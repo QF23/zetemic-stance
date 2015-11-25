@@ -30,7 +30,7 @@ size=5 #Integer. As the parameter size increases, the size of the relevant time 
 M_W=int(M/size)
 W=8 #Number of time windows on which the sliding average is computed. 
 
-close=100. #Float number from 0 to 100. This parameter governs the closeness to the channel of the minimal value taken as an input for the logit transformation. 0 corresponds to the x_bar value, 100 to the upper fluctuation.
+close=92. #Float number from 0 to 100. This parameter governs the closeness to the channel of the minimal value taken as an input for the logit transformation. 0 corresponds to the x_bar value, 100 to the upper fluctuation.
 
 plot_logit=0 #=1 to plot the logit transformation of each process.
 
@@ -158,15 +158,15 @@ while j<loop:
     if init==0:
         g_fixed=g
         delta_fixed=delta_gamma
+        beta_fixed=beta
         init=1
         
     if para_fixed==1:
         g=g_fixed
         delta_gamma=delta_fixed
+        beta=beta_fixed
         
-
     gamma=g+delta_gamma
-
     
 
     F=[]
@@ -181,8 +181,7 @@ while j<loop:
     F=F[0:500]
     x_min=xvec[F.index(min(F))]
     P_min=min(F)+x_min
-##    print x_min
-##    
+ 
 
 
     memoire=[0]*M
@@ -232,61 +231,6 @@ while j<loop:
     for k in range(len(N_M_tot)-(W-1)):
         N_W.append((sum(N_M_tot[k:k+W]))/float(W))
 
-    logit=[]
-    bit=1
-    t_alt=[]
-    for i in range(len(N_W)):
-        if N_W[i]<(1.-1./float(M)):
-            if N_W[i]>0.:
-                if bit==1 :
-                    t_min=i
-                    bit=0
-                logit.append(1./2.*np.log(N_W[i]/(1.-N_W[i])))
-                t_alt.append(i)
-        else:
-            t_max=i
-            break
-
-
-    x=np.arange(0,len(logit),1)*1.0
-    logit=np.array(logit)
-
-##    print x.shape
-##    print logit.shape
-
-    parametres,covariance=opt.curve_fit(fun,x,logit,[0.1,0,0.1,5])
-
-    a,b,c,x_bar=parametres[:]
-
-    if j%1500==0:
-
-        print j
-##        print parametres
-##        print 'gamma'
-##        print gamma
-##        print 'g_look'
-##        print g_look
-##        print 'b'
-##        print beta
-##        print 'd'
-##        print delta_gamma
-##        print dder
-##        print db
-##        print 'a'
-##        print a
-##        print 'c'
-##        print c
-##        print 'xbar'
-##        print x_bar
-        y2=fun(x,a,b,c,x_bar)
-        plt.plot(x,y2)
-        plt.plot(x,logit)
-        plt.show()
-
-        plt.plot(N_W)
-        plt.show()
-
-    phaseII=len(logit)-x_bar
 
     Nmax=max(N_W)
 
@@ -323,36 +267,15 @@ while j<loop:
 
             if plot_logit==1:
 
+                plt.plot(N_W)
+                plt.show()
+
                 yP3=linear(abs_2,h_MB,ord_MB)
 
                 plt.plot(abs_2, logit2, 'go', lw=2)
                 plt.plot(abs_2,yP3,'r',lw=2)
                 plt.show()
 
-##            print lower_x
-##            print lower_x2
-##            print lower_x_0
-##            print delta_gamma
-##            print beta
-##            print ''
-##
-##            length=len(N_W)
-##            low1=[]
-##            low2=[]
-##            low3=[]
-##
-##            for i in range(length):
-##                low1.append(lower_x)
-##                low2.append(lower_x2)
-##                low3.append(lower_x_0)
-##
-##            xdumb=np.arange(length)
-##            
-##            plt.plot(N_W)
-##            plt.plot(xdumb,low1)
-##            plt.plot(xdumb,low2)
-##            plt.plot(xdumb,low3)
-##            plt.show()
 
             phiII.append(w_MB)
             pente.append(h_MB)
@@ -362,7 +285,6 @@ while j<loop:
             beta_data.append(beta)
             gamma_data.append(gamma)
             delta_data.append(delta_gamma)
-            x_bar_data.append(x_bar)
 
             j+=1
 
