@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 
 # -*- coding: utf-8 -*-
 
@@ -302,8 +304,9 @@ while j<loop:
                         logit2.append(1./2.*np.log((N_W[i]-lower_x2)/(1.-N_W[i])))
                         t_1_data.append(i)
                     if N_W[i]<lower_x2:
+                        if not(not(logit2)):
+                            t_1_data.pop(-1)
                         logit2=[]
-                        t_1_data.pop(-1)
                 else:
                     t_2_data.append(i)
                     break
