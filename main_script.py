@@ -1,3 +1,4 @@
+
 # -*- coding: utf-8 -*-
 
 
@@ -31,7 +32,7 @@ close=100. #Float number from 0 to 100. This parameter governs the closeness to 
 
 plot_logit=0 #=1 to plot the logit transformation of each process.
 
-para_fixed=0 #=1 to fix the value of the parameters for all loops
+para_fixed=1 #=1 to fix the value of the parameters for all loops
 
 
 #INITIALIZING LISTS AND INDICES
@@ -47,6 +48,8 @@ beta_data=[]
 gamma_data=[]
 delta_data=[]
 x_bar_data=[]
+t_1_data=[]
+t_2_data=[]
 
 ##DEFINITIONS DE FONCTIONS##
 
@@ -291,17 +294,18 @@ while j<loop:
 
             logit2=[]
             bit=1
-            t_alt=[]
             lower_x=P_min+np.sqrt(P_min*(1-P_min)/float(M_W))
             lower_x2=(1.*(100.-close)+close*lower_x)/100.
             for i in range(len(N_W)):
                 if N_W[i]<(1.-10./float(M)):
                     if N_W[i]>lower_x2:
                         logit2.append(1./2.*np.log((N_W[i]-lower_x2)/(1.-N_W[i])))
-                        t_alt.append(i)
+                        t_1_data.append(i)
                     if N_W[i]<lower_x2:
                         logit2=[]
+                        t_1_data.pop(-1)
                 else:
+                    t_2_data.append(i)
                     break
 
             logit2=np.array(logit2)
@@ -378,6 +382,13 @@ plt.show()
 
 plt.plot(logphi,logP,'o')
 plt.show()
+
+plt.plot(t_1_data,'o')
+plt.show()
+
+plt.plot(t_2_data,'o')
+plt.show()
+
 
 logphi=np.array(logphi)
 logP=np.array(logP)
