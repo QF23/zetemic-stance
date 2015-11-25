@@ -7,25 +7,34 @@ import numpy as np
 import matplotlib.pyplot as plt
 import scipy.optimize as opt
 
-
+#PARAMETERS
 
 M=5000 #mémoire du système
 time = 500000
 
 gamma_init=0.23 #facteur d'implicature
 
-#np.random.seed(34)
 np.random.seed(77)
 
-beta_max=2.03
+beta_min=0.593
+beta_max=2.03 
+delta_min=0.0002
+delta_max=0.001
 
-loop=300
+loop=300 #number of processes
 
-size=5
+size=5 #Integer. As the parameter size increases, the size of the relevant time window on which produced occurrences are counted diminishes.
 M_W=int(M/size)
-W=8
+W=8 #Number of time windows on which the sliding average is computed. 
 
-plot_logit=0
+close=100. #Float number from 0 to 100. This parameter governs the closeness to the channel of the minimal value taken as an input for the logit transformation. 0 corresponds to the x_bar value, 100 to the upper fluctuation.
+
+plot_logit=0 #=1 to plot the logit transformation of each process.
+
+para_fixed=0 #=1 to fix the value of the parameters for all loops
+
+
+#INITIALIZING LISTS AND INDICES
 
 j=0
 j_ctrl=0
@@ -66,12 +75,13 @@ def linear(x,alp,bet):
 
 ##DEBUT DE LA BOUCLE##
 
+init=0
 
 while j<loop:
 
-    beta=np.random.uniform(0.593,beta_max)
+    beta=np.random.uniform(beta_min,beta_max)
 
-    delta_gamma=np.random.uniform(0.0002,0.001) ##Ecart au gamma critique
+    delta_gamma=np.random.uniform(delta_min,delta_max) ##Ecart au gamma critique
 
 
     ##DETERMINATION DU GAMMA CRITIQUE
@@ -140,7 +150,19 @@ while j<loop:
 
     ##GAMMA CRITIQUE DETERMINE##
 
+    if init==0:
+        g_fixed=g
+        delta_fixed=delta_gamma
+        init=1
+        
+    if para_fixed==1:
+        g=g_fixed
+        delta_gamma=delta_fixed
+        
+
     gamma=g+delta_gamma
+
+    
 
     F=[]
     xvec=[]
@@ -267,30 +289,18 @@ while j<loop:
 
         if (db<10**(-6))&(dder<10**(-6)):
 
-##            if x_bar>1.:
-##
-##                if a<c:
-##
-##                    if a>0.:
-##
-##                        if x_bar>size:
-##
-##                            if fun(x,a,b,c,x_bar)[-1]>0.:
-##                    
-##                                if np.isfinite(np.log(phaseII)):
-
             logit2=[]
             bit=1
             t_alt=[]
-            lower_x_0=N_W[int(x_bar)+1]
-            lower_x=(lower_x_0+9*P_min)/10.
-            lower_x2=P_min+np.sqrt(P_min*(1-P_min)/float(M_W))
+            lower_x=P_min+np.sqrt(P_min*(1-P_min)/float(M_W))
+            lower_x2=(1.*(100.-close)+close*lower_x)/100.
             for i in range(len(N_W)):
                 if N_W[i]<(1.-10./float(M)):
-                    if N_W[i]>lower_x:
-#                                                    logit2.append(1./2.*np.log((N_W[i]-N_W[int(x_bar)])/(1.-N_W[i])))
-                        logit2.append(1./2.*np.log((N_W[i]-lower_x)/(1.-N_W[i])))
+                    if N_W[i]>lower_x2:
+                        logit2.append(1./2.*np.log((N_W[i]-lower_x2)/(1.-N_W[i])))
                         t_alt.append(i)
+                    if N_W[i]<lower_x2:
+                        logit2=[]
                 else:
                     break
 
@@ -312,30 +322,30 @@ while j<loop:
                 plt.plot(abs_2,yP3,'r',lw=2)
                 plt.show()
 
-            print lower_x
-            print lower_x2
-            print lower_x_0
-            print delta_gamma
-            print beta
-            print ''
-
-            length=len(N_W)
-            low1=[]
-            low2=[]
-            low3=[]
-
-            for i in range(length):
-                low1.append(lower_x)
-                low2.append(lower_x2)
-                low3.append(lower_x_0)
-
-            xdumb=np.arange(length)
-            
-            plt.plot(N_W)
-            plt.plot(xdumb,low1)
-            plt.plot(xdumb,low2)
-            plt.plot(xdumb,low3)
-            plt.show()
+##            print lower_x
+##            print lower_x2
+##            print lower_x_0
+##            print delta_gamma
+##            print beta
+##            print ''
+##
+##            length=len(N_W)
+##            low1=[]
+##            low2=[]
+##            low3=[]
+##
+##            for i in range(length):
+##                low1.append(lower_x)
+##                low2.append(lower_x2)
+##                low3.append(lower_x_0)
+##
+##            xdumb=np.arange(length)
+##            
+##            plt.plot(N_W)
+##            plt.plot(xdumb,low1)
+##            plt.plot(xdumb,low2)
+##            plt.plot(xdumb,low3)
+##            plt.show()
 
             phiII.append(w_MB)
             pente.append(h_MB)
