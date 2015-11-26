@@ -35,7 +35,7 @@ close=92. #Float number from 0 to 100. This parameter governs the closeness to t
 
 plot_logit=0 #=1 to plot the logit transformation of each process.
 
-para_fixed=1 #=1 to fix the value of the parameters for all loops
+para_fixed=0 #=1 to fix the value of the parameters for all loops
 
 
 #INITIALIZING LISTS AND INDICES
@@ -256,7 +256,7 @@ while j<loop:
                             bit=1
                         logit2=[]
                 else:
-                    t_2_data.append(i)
+                    t_2_data.append(i-t_1_data[-1])
                     break
 
             logit2=np.array(logit2)
