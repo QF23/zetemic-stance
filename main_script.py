@@ -235,7 +235,7 @@ while j<loop:
 
     Nmax=max(N_W)
 
-    if Nmax>0.9 :
+    if Nmax>(1.-10./float(M)):
 
         if (db<10**(-6))&(dder<10**(-6)):
 
