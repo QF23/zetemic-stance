@@ -1,3 +1,4 @@
+
 # -*- coding: utf-8 -*-
 
 
@@ -246,10 +247,13 @@ while j<loop:
                 if N_W[i]<(1.-10./float(M)):
                     if N_W[i]>lower_x2:
                         logit2.append(1./2.*np.log((N_W[i]-lower_x2)/(1.-N_W[i])))
-                        t_1_data.append(i)
+                        if bit==1:
+                            t_1_data.append(i)
+                            bit=0
                     if N_W[i]<lower_x2:
                         if not(not(logit2)):
                             t_1_data.pop(-1)
+                            bit=1
                         logit2=[]
                 else:
                     t_2_data.append(i)
@@ -288,7 +292,7 @@ while j<loop:
 
             j+=1
 
-    if j%100==0:
+    if j%10==0:
         print j
 
     j_ctrl+=1
