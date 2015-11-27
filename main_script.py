@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 
 # -*- coding: utf-8 -*-
 
@@ -53,6 +55,7 @@ delta_data=[]
 x_bar_data=[]
 t_1_data=[]
 t_2_data=[]
+t_init=[]
 
 ##DEFINITIONS DE FONCTIONS##
 
@@ -241,9 +244,15 @@ while j<loop:
 
             logit2=[]
             bit=1
+            inibit=1
+            x_entry=P_min-np.sqrt(P_min*(1-P_min)/float(M_W))
             lower_x=P_min+np.sqrt(P_min*(1-P_min)/float(M_W))
             lower_x2=(1.*(100.-close)+close*lower_x)/100.
             for i in range(len(N_W)):
+                if inibit==1:
+                    if N_W[i]>x_entry:
+                        t_init.append(i)
+                        inibit=0
                 if N_W[i]<(1.-10./float(M)):
                     if N_W[i]>lower_x2:
                         logit2.append(1./2.*np.log((N_W[i]-lower_x2)/(1.-N_W[i])))
@@ -257,6 +266,7 @@ while j<loop:
                         logit2=[]
                 else:
                     t_2_data.append(i-t_1_data[-1])
+                    t_1_data[-1]=t_1_data[-1]-t_init[-1]
                     break
 
             logit2=np.array(logit2)
