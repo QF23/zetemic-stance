@@ -44,17 +44,17 @@ W=8 #Number of time windows on which the sliding average is computed.
 
 close=100. #Float number from 0 to 100. This parameter governs the closeness to the channel of the minimal value taken as an input for the logit transformation. 0 corresponds to the x_bar value, 100 to the upper fluctuation.
 
-plot_logit=1 #=1 to plot the logit transformation of each process.
+plot_logit=0 #=1 to plot the logit transformation of each process.
 
 para_fixed=0 #=1 to fix the value of the parameters for all loops
 
-window=0 #=1 to consider time windows as with the other observable
+window=1 #=1 to consider time windows as with the other observable
 
-observable_P=0 #1 to switch to observable P instead of x
+observable_P=1 #1 to switch to observable P instead of x
 
-x_bar_version=0 #1 to use a numerical separation of the two phases
+x_bar_version=1 #1 to use a numerical separation of the two phases
 
-old_version=0 #1 to run the older version of the progrem with a zero minimum for the logit. Works only if x_bar_version is 1. 
+old_version=1 #1 to run the older version of the progrem with a zero minimum for the logit. Works only if x_bar_version is 1. 
 
 #INITIALIZING LISTS AND INDICES
 
@@ -291,12 +291,11 @@ while j<loop:
             else:
                 break
 
-        logit=logit[M:]
         x=np.arange(0,len(logit),1)*1.0
         logit=np.array(logit)
 
 
-        parametres,covariance=opt.curve_fit(fun,x,logit,[0.00001,0,7.8,250000])
+        parametres,covariance=opt.curve_fit(fun,x,logit,[0.00001,0,7.8,len(logit)*2./3.])
 
         a,b,c,x_bar=parametres[:]
 
