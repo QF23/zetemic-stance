@@ -12,6 +12,9 @@
 
 # -*- coding: utf-8 -*-
 
+
+# -*- coding: utf-8 -*-
+
 import numpy as np
 import matplotlib.pyplot as plt
 import scipy.optimize as opt
@@ -19,12 +22,13 @@ import scipy.optimize as opt
 #PARAMETERS
 
 M=5000 #mémoire du système
-time = 500000
+time = 1000000
 
 gamma_init=0.23 #facteur d'implicature
 
 #np.random.seed(77)
-np.random.seed(43)
+#np.random.seed(43)
+np.random.seed(23)
 
 beta_min=0.593
 beta_max=2.03 
@@ -34,7 +38,7 @@ delta_max=0.0001
 #delta_min=0.002
 #delta_max=0.05
 
-loop=50 #number of processes
+loop=300 #number of processes
 
 size=5 #Integer. As the parameter size increases, the size of the relevant time window on which produced occurrences are counted diminishes.
 M_W=int(M/size)
@@ -48,13 +52,17 @@ plot_logit=0 #=1 to plot the logit transformation of each process.
 
 para_fixed=0 #=1 to fix the value of the parameters for all loops
 
-window=1 #=1 to consider time windows as with the other observable
+window=0 #=1 to consider time windows as with the other observable
 
-observable_P=1 #1 to switch to observable P instead of x
+observable_P=0 #1 to switch to observable P instead of x
 
-x_bar_version=1 #1 to use a numerical separation of the two phases
+x_bar_version=0 #1 to use a numerical separation of the two phases
 
-old_version=1 #1 to run the older version of the progrem with a zero minimum for the logit. Works only if x_bar_version is 1. 
+old_version=0 #1 to run the older version of the progrem with a zero minimum for the logit. Works only if x_bar_version is 1. 
+
+alloc=1 #=1 to consider an alternative mechanism
+
+both_mechs=0 #=1 # to consider both speaker/prudcer and hearer/interpreter mechanism
 
 #INITIALIZING LISTS AND INDICES
 
@@ -172,6 +180,10 @@ while j<loop:
         else:
             break
 
+    if both_mechs==1:
+        g=np.sqrt(1+g)-1
+
+
 
     ##GAMMA CRITIQUE DETERMINE##
 
@@ -195,14 +207,21 @@ while j<loop:
     for ix in range(1,1000):
         x=float(ix)/1000.
         xvec.append(x)
-        f=(x+gamma)/(1.+gamma)
+        if (alloc==0)|(both_mechs==1):
+            f=(x+gamma)/(1.+gamma)
+        else:
+            f=x
         phi=(2*f-1)/np.sqrt(f*(1-f))
-        F.append(1./2.*(1+np.tanh(beta*phi))-x)
+        if (alloc==0)&(both_mechs==0):
+            F.append(1./2.*(1+np.tanh(beta*phi))-x)
+        else:
+            F.append(1./2.*(1./2.*(1+np.tanh(beta*phi))-x+gamma*(1-x)))
         P.append(1./2.*(1+np.tanh(beta*phi)))
+
         
     F=F[0:500]
     x_min=xvec[F.index(min(F))]
-    P_min=min(F)+x_min
+    P_min=P[F.index(min(F))]
     P_entry=P_min-np.sqrt(P_min*(1-P_min)/float(M_W))
     P_out=P_min+np.sqrt(P_min*(1-P_min)/float(M_W))
     ind_entry=min( range( len(P) ), key=lambda i:abs(P_entry-P[i]) )
@@ -210,13 +229,8 @@ while j<loop:
     x_entry=xvec[ind_entry]
     x_out=xvec[ind_out]
 
-        
-    
- 
-
 
     memoire=[0]*M
-    N0=0
     N=0
     x=float(N)/float(M)
 
@@ -224,49 +238,77 @@ while j<loop:
 
     N_M=0
 
+    site_call=0
+
 
     for i in range(time):
-        f=(x+gamma)/(1+gamma)
-        if f!=0.0:
-            if f!=1.:
-                phi=(2*f-1)/np.sqrt(f*(1-f))
-                P=1./2.*(1+np.tanh(beta*phi))
+      
+
+        if (alloc==0)&(both_mechs==0):
+            coin_site=1.
+        else:
+            coin_site=np.random.uniform(0,1)
+            coin_add=np.random.uniform(0,1)
+
+        if coin_site>0.5:
+            site_call+=1
+            if (alloc==1)&(both_mechs==0):
+                f=x
             else:
-                P=1.0
-        else:
-            P=0.0
-        dice=np.random.uniform(0,1)
-        if P>dice:
-            N+=1
-            memoire.append(1)
-            N_M+=1
-        else:
-            memoire.append(0)
-        erased=np.random.randint(0,M)
-        occ=memoire[erased]
-        if occ==1:
-            N-=1
-        memoire.remove(occ)
-        x=float(N)/float(M)
-
-        if window==1:
-
-            if i%M_W==0:
-                if observable_P==1:
-                    N_tot.append(float(N_M)/float(M_W))
-                    N_M=0
+                f=(x+gamma)/(1+gamma)
+            if f!=0.0:
+                if f!=1.:
+                    phi=(2*f-1)/np.sqrt(f*(1-f))
+                    P=1./2.*(1+np.tanh(beta*phi))
                 else:
-                    N_tot.append(x)
+                    P=1.0
+            else:
+                P=0.0
+            dice=np.random.uniform(0,1)
+            if P>dice:
+                N+=1
+                memoire.append(1)
+                N_M+=1
+            else:
+                memoire.append(0)
+            erased=np.random.randint(0,M)
+            occ=memoire[erased]
+            if occ==1:
+                N-=1
+            memoire.remove(occ)
+            x=float(N)/float(M)
+        else :
+            if coin_add<gamma:
+                N+=1
+                memoire.append(1)
+                erased=np.random.randint(0,M)
+                occ=memoire[erased]
+                if occ==1:
+                    N-=1
+                memoire.remove(occ)
+                x=float(N)/float(M)
+
+        if window==0:
+            N_tot.append(x)
+            if x==1.:
+                break
+
+        else:
+
+            if i!=0:
+                if i%M_W==0:
+                    if observable_P==1:
+                        N_tot.append(float(N_M)/float(site_call))
+                        N_M=0
+                        site_call=0
+                    else:
+                        N_tot.append(x)
           
             if x==1.:
                 if i%(W*M)==0:
-                    break
+                    break   
 
-        else:
-            N_tot.append(x)
-
-            if x==1.:
-                break
+        
             
     if window==1:
 
@@ -277,7 +319,6 @@ while j<loop:
 
     else:
         N_W = N_tot
-
 
     Nmax=max(N_W)
 
