@@ -100,7 +100,7 @@ while j<loop:
 
     beta=np.random.uniform(beta_min,beta_max)
 
-    delta_gamma=np.random.uniform(delta_min,delta_max) ##Ecart au gamma critique
+    delta_gamma=np.random.uniform(max(0,delta_min),min(1,delta_max)) ##Ecart au gamma critique
 
 
     ##DETERMINATION DU GAMMA CRITIQUE
