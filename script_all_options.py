@@ -1,20 +1,5 @@
-
 # -*- coding: utf-8 -*-
 
-
-# -*- coding: utf-8 -*-
-
-
-# -*- coding: utf-8 -*-
-
-
-# -*- coding: utf-8 -*-
-
-
-# -*- coding: utf-8 -*-
-
-
-# -*- coding: utf-8 -*-
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -34,8 +19,8 @@ np.random.seed(23)
 beta_min=0.593
 beta_max=2.03 
 #delta_min=0.000002
-delta_min=0.0001
-delta_max=0.0001
+delta_min=0.1
+delta_max=0.1
 #delta_min=0.002
 #delta_max=0.05
 
@@ -63,7 +48,7 @@ old_version=0 #1 to run the older version of the progrem with a zero minimum for
 
 alloc=0 #=1 to consider an alternative mechanism
 
-both_mechs=1 #=1 # to consider both speaker/prudcer and hearer/interpreter mechanism
+both_mechs=1 #=1 # to consider both speaker/producer and hearer/interpreter mechanism
 
 #INITIALIZING LISTS AND INDICES
 
@@ -622,7 +607,7 @@ p1, = plt.plot(logphi,yP2,label="Scaling law with exponent %.2f" % (-coeff_phi/c
 plt.plot(logphi,logP,'o')
 plt.xlabel('log w ')
 plt.ylabel('log alpha ')
-plt.title('Scaling law')
+plt.title('Scaling law with delta =%f' %delta_min)
 plt.legend(loc=1)
 plt.show()
 
