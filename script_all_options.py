@@ -1,3 +1,4 @@
+
 # -*- coding: utf-8 -*-
 
 
@@ -38,9 +39,9 @@ delta_max=0.0001
 #delta_min=0.002
 #delta_max=0.05
 
-loop=300 #number of processes
+loop=700 #number of processes
 
-size=5 #Integer. As the parameter size increases, the size of the relevant time window on which produced occurrences are counted diminishes.
+size=1 #Integer. As the parameter size increases, the size of the relevant time window on which produced occurrences are counted diminishes.
 M_W=int(M/size)
 W=8 #Number of time windows on which the sliding average is computed.
 
@@ -52,17 +53,17 @@ plot_logit=0 #=1 to plot the logit transformation of each process.
 
 para_fixed=0 #=1 to fix the value of the parameters for all loops
 
-window=0 #=1 to consider time windows as with the other observable
+window=1 #=1 to consider time windows as with the other observable
 
-observable_P=0 #1 to switch to observable P instead of x
+observable_P=1 #1 to switch to observable P instead of x
 
 x_bar_version=0 #1 to use a numerical separation of the two phases
 
 old_version=0 #1 to run the older version of the progrem with a zero minimum for the logit. Works only if x_bar_version is 1. 
 
-alloc=1 #=1 to consider an alternative mechanism
+alloc=0 #=1 to consider an alternative mechanism
 
-both_mechs=0 #=1 # to consider both speaker/prudcer and hearer/interpreter mechanism
+both_mechs=1 #=1 # to consider both speaker/prudcer and hearer/interpreter mechanism
 
 #INITIALIZING LISTS AND INDICES
 
@@ -228,6 +229,10 @@ while j<loop:
     ind_out=min( range( len(P) ), key=lambda i:abs(P_out-P[i]) )
     x_entry=xvec[ind_entry]
     x_out=xvec[ind_out]
+
+    if observable_P==1:
+        x_out=P_out
+        x_entry=P_entry
 
 
     memoire=[0]*M
@@ -613,11 +618,12 @@ print -coeff_phi/coeff_P,-coeff_cross/coeff_P
 logphi=np.array(logphi)
 
 yP2=linear(logphi,-coeff_phi/coeff_P,-coeff_cross/coeff_P)
-plt.plot(logphi,yP2)
+p1, = plt.plot(logphi,yP2,label="Scaling law with exponent %.2f" % (-coeff_phi/coeff_P))
 plt.plot(logphi,logP,'o')
 plt.xlabel('log w ')
 plt.ylabel('log alpha ')
 plt.title('Scaling law')
+plt.legend(loc=1)
 plt.show()
 
 
