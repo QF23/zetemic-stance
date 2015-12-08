@@ -1,3 +1,4 @@
+
 # -*- coding: utf-8 -*-
 
 
@@ -19,8 +20,8 @@ np.random.seed(23)
 beta_min=0.593
 beta_max=2.03 
 #delta_min=0.000002
-delta_min=0.1
-delta_max=0.1
+delta_min=0.0001
+delta_max=0.0001
 #delta_min=0.002
 #delta_max=0.05
 
@@ -32,7 +33,7 @@ W=8 #Number of time windows on which the sliding average is computed.
 
 ##OPTIONS
 
-close=100. #Float number from 0 to 100. This parameter governs the closeness to the channel of the minimal value taken as an input for the logit transformation. 0 corresponds to the x_bar value, 100 to the upper fluctuation.
+close=98. #Float number from 0 to 100. This parameter governs the closeness to the channel of the minimal value taken as an input for the logit transformation. 0 corresponds to the x_bar value, 100 to the upper fluctuation.
 
 plot_logit=0 #=1 to plot the logit transformation of each process.
 
@@ -506,6 +507,8 @@ while j<loop:
 
                     h_MB, ord_MB = para_logit2
 
+                    err=sum((logit2-(h_MB*abs_2+ord_MB))**2)/w_MB
+
                     if plot_logit==1:
 
                         length=len(N_W)
@@ -529,17 +532,18 @@ while j<loop:
                         plt.plot(abs_2,yP3,'r',lw=2)
                         plt.show()
 
+                    if err<0.1:
 
-                    phiII.append(w_MB)
-                    pente.append(h_MB)
-                    logphi.append(np.log(w_MB))
-                    logP.append(np.log(h_MB))
+                        phiII.append(w_MB)
+                        pente.append(h_MB)
+                        logphi.append(np.log(w_MB))
+                        logP.append(np.log(h_MB))
 
-                    beta_data.append(beta)
-                    gamma_data.append(gamma)
-                    delta_data.append(delta_gamma)
+                        beta_data.append(beta)
+                        gamma_data.append(gamma)
+                        delta_data.append(delta_gamma)
 
-                    j+=1
+                        j+=1
         
 
     if j%10==0:
