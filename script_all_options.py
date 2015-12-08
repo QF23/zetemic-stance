@@ -35,7 +35,7 @@ W=8 #Number of time windows on which the sliding average is computed.
 
 error_threshold=1.0
 
-close=100. #Float number from 0 to 100. This parameter governs the closeness to the channel of the minimal value taken as an input for the logit transformation. 0 corresponds to the x_bar value, 100 to the upper fluctuation.
+close=95. #Float number from 0 to 100. This parameter governs the closeness to the channel of the minimal value taken as an input for the logit transformation. 0 corresponds to the x_bar value, 100 to the upper fluctuation.
 
 plot_logit=0 #=1 to plot the logit transformation of each process.
 
@@ -47,7 +47,7 @@ observable_P=1 #1 to switch to observable P instead of x
 
 x_bar_version=0 #1 to use a numerical separation of the two phases
 
-old_version=0 #1 to run the older version of the progrem with a zero minimum for the logit. Works only if x_bar_version is 1. 
+old_version=0 #1 to run the older version of the program with a zero minimum for the logit. Works only if x_bar_version is 1. 
 
 alloc=1 #=1 to consider an alternative mechanism
 
