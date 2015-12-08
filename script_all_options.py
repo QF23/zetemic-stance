@@ -25,7 +25,7 @@ delta_max=0.0001
 #delta_min=0.002
 #delta_max=0.05
 
-loop=700 #number of processes
+loop=300 #number of processes
 
 size=1 #Integer. As the parameter size increases, the size of the relevant time window on which produced occurrences are counted diminishes.
 M_W=int(M/size)
@@ -33,7 +33,9 @@ W=8 #Number of time windows on which the sliding average is computed.
 
 ##OPTIONS
 
-close=98. #Float number from 0 to 100. This parameter governs the closeness to the channel of the minimal value taken as an input for the logit transformation. 0 corresponds to the x_bar value, 100 to the upper fluctuation.
+error_threshold=1.0
+
+close=100. #Float number from 0 to 100. This parameter governs the closeness to the channel of the minimal value taken as an input for the logit transformation. 0 corresponds to the x_bar value, 100 to the upper fluctuation.
 
 plot_logit=0 #=1 to plot the logit transformation of each process.
 
@@ -47,9 +49,9 @@ x_bar_version=0 #1 to use a numerical separation of the two phases
 
 old_version=0 #1 to run the older version of the progrem with a zero minimum for the logit. Works only if x_bar_version is 1. 
 
-alloc=0 #=1 to consider an alternative mechanism
+alloc=1 #=1 to consider an alternative mechanism
 
-both_mechs=1 #=1 # to consider both speaker/producer and hearer/interpreter mechanism
+both_mechs=0 #=1 # to consider both speaker/producer and hearer/interpreter mechanism
 
 #INITIALIZING LISTS AND INDICES
 
@@ -532,7 +534,7 @@ while j<loop:
                         plt.plot(abs_2,yP3,'r',lw=2)
                         plt.show()
 
-                    if err<0.1:
+                    if err<error_threshold:
 
                         phiII.append(w_MB)
                         pente.append(h_MB)
@@ -544,6 +546,9 @@ while j<loop:
                         delta_data.append(delta_gamma)
 
                         j+=1
+
+                    else :
+                        print err
         
 
     if j%10==0:
