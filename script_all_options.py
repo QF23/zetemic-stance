@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 
 # -*- coding: utf-8 -*-
 
@@ -33,7 +35,7 @@ W=8 #Number of time windows on which the sliding average is computed.
 
 ##OPTIONS
 
-error_threshold=1.0
+error_threshold=0.15
 
 close=95. #Float number from 0 to 100. This parameter governs the closeness to the channel of the minimal value taken as an input for the logit transformation. 0 corresponds to the x_bar value, 100 to the upper fluctuation.
 
@@ -49,9 +51,9 @@ x_bar_version=0 #1 to use a numerical separation of the two phases
 
 old_version=0 #1 to run the older version of the program with a zero minimum for the logit. Works only if x_bar_version is 1. 
 
-alloc=1 #=1 to consider an alternative mechanism
+alloc=0 #=1 to consider an alternative mechanism
 
-both_mechs=0 #=1 # to consider both speaker/producer and hearer/interpreter mechanism
+both_mechs=1 #=1 # to consider both speaker/producer and hearer/interpreter mechanism
 
 #INITIALIZING LISTS AND INDICES
 
@@ -473,43 +475,51 @@ while j<loop:
 
                 if (db<10**(-6))&(dder<10**(-6)):
 
-                    logit2=[]
-                    bit=1
-                    inibit=1
-                    lower_x=x_out
-                    lower_x2=(1.*(100.-close)+close*lower_x)/100.
-                    for i in range(len(N_W)):
-                        if inibit==1:
-                            if N_W[i]>x_entry:
-                                t_init.append(i)
-                                inibit=0
-                        if N_W[i]<(1.-10./float(M)):
-                            if N_W[i]>lower_x2:
-                                logit2.append(1./2.*np.log((N_W[i]-lower_x2)/(1.-N_W[i])))
-                                if bit==1:
-                                    t_1_data.append(i)
-                                    bit=0
-                            if N_W[i]<lower_x2:
-                                if not(not(logit2)):
-                                    t_1_data.pop(-1)
-                                    bit=1
-                                logit2=[]
-                        else:
-                            t_2_data.append(i-t_1_data[-1])
-                            t_1_data[-1]=t_1_data[-1]-t_init[-1]
-                            break
+                    close_loc=101.
 
-                    logit2=np.array(logit2)
+                    err=1.
 
-                    w_MB=logit2.shape[0]
+                    while (close_loc>close)&(err>error_threshold):
 
-                    abs_2=np.arange(w_MB)
+                        close_loc-=1.
 
-                    para_logit2,cov_logit2=opt.curve_fit(linear,abs_2,logit2,[1.,0.])
+                        logit2=[]
+                        bit=1
+                        inibit=1
+                        lower_x=x_out
+                        lower_x2=(1.*(100.-close_loc)+close_loc*lower_x)/100.
+                        for i in range(len(N_W)):
+                            if inibit==1:
+                                if N_W[i]>x_entry:
+                                    t_init.append(i)
+                                    inibit=0
+                            if N_W[i]<(1.-10./float(M)):
+                                if N_W[i]>lower_x2:
+                                    logit2.append(1./2.*np.log((N_W[i]-lower_x2)/(1.-N_W[i])))
+                                    if bit==1:
+                                        t_1_data.append(i)
+                                        bit=0
+                                if N_W[i]<lower_x2:
+                                    if not(not(logit2)):
+                                        t_1_data.pop(-1)
+                                        bit=1
+                                    logit2=[]
+                            else:
+                                t_2_data.append(i-t_1_data[-1])
+                                t_1_data[-1]=t_1_data[-1]-t_init[-1]
+                                break
 
-                    h_MB, ord_MB = para_logit2
+                        logit2=np.array(logit2)
 
-                    err=sum((logit2-(h_MB*abs_2+ord_MB))**2)/w_MB
+                        w_MB=logit2.shape[0]
+
+                        abs_2=np.arange(w_MB)
+
+                        para_logit2,cov_logit2=opt.curve_fit(linear,abs_2,logit2,[1.,0.])
+
+                        h_MB, ord_MB = para_logit2
+
+                        err=np.sqrt(sum((logit2-(h_MB*abs_2+ord_MB))**2)/w_MB)/(sum((logit2-(sum(logit2)/w_MB))**2)/w_MB)
 
                     if plot_logit==1:
 
