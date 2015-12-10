@@ -19,8 +19,8 @@ gamma_init=0.23 #facteur d'implicature
 #np.random.seed(43)
 np.random.seed(23)
 
-beta_min=0.593
-beta_max=2.03 
+beta_min=0.83
+beta_max=0.83 
 #delta_min=0.000002
 delta_min=0.0001
 delta_max=0.0001
@@ -29,15 +29,15 @@ delta_max=0.0001
 
 loop=300 #number of processes
 
-size=1 #Integer. As the parameter size increases, the size of the relevant time window on which produced occurrences are counted diminishes.
+size=0.75 #Integer. As the parameter size increases, the size of the relevant time window on which produced occurrences are counted diminishes.
 M_W=int(M/size)
 W=8 #Number of time windows on which the sliding average is computed.
 
 ##OPTIONS
 
-error_threshold=0.15
+error_threshold=0.15 #float number between 0. and 1., with 0. for no error tolerance, and 1. to accept all logit modelings. 
 
-close=95. #Float number from 0 to 100. This parameter governs the closeness to the channel of the minimal value taken as an input for the logit transformation. 0 corresponds to the x_bar value, 100 to the upper fluctuation.
+close=920. #Float number from 0 to 1000. This parameter governs the closeness to the channel of the minimal value taken as an input for the logit transformation. 0 corresponds to the x_bar value, 100 to the upper fluctuation.
 
 plot_logit=0 #=1 to plot the logit transformation of each process.
 
@@ -53,7 +53,7 @@ old_version=0 #1 to run the older version of the program with a zero minimum for
 
 alloc=0 #=1 to consider an alternative mechanism
 
-both_mechs=1 #=1 # to consider both speaker/producer and hearer/interpreter mechanism
+both_mechs=0 #=1 # to consider both speaker/producer and hearer/interpreter mechanism
 
 #INITIALIZING LISTS AND INDICES
 
@@ -475,9 +475,9 @@ while j<loop:
 
                 if (db<10**(-6))&(dder<10**(-6)):
 
-                    close_loc=101.
+                    close_loc=1001.
 
-                    err=1.
+                    err=2.
 
                     while (close_loc>close)&(err>error_threshold):
 
@@ -487,7 +487,7 @@ while j<loop:
                         bit=1
                         inibit=1
                         lower_x=x_out
-                        lower_x2=(1.*(100.-close_loc)+close_loc*lower_x)/100.
+                        lower_x2=(1.*(1000.-close_loc)+close_loc*lower_x)/1000.
                         for i in range(len(N_W)):
                             if inibit==1:
                                 if N_W[i]>x_entry:
@@ -509,7 +509,7 @@ while j<loop:
                                 t_1_data[-1]=t_1_data[-1]-t_init[-1]
                                 break
 
-                        logit2=np.array(logit2)
+                        logit2=np.array(logit2[:-2])
 
                         w_MB=logit2.shape[0]
 
