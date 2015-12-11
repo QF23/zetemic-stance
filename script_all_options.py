@@ -11,7 +11,7 @@ import scipy.optimize as opt
 #PARAMETERS
 
 M=5000 #mémoire du système
-time = 1000000
+time = 2000000
 
 gamma_init=0.23 #facteur d'implicature
 
@@ -27,17 +27,17 @@ delta_max=0.0001
 #delta_min=0.002
 #delta_max=0.05
 
-loop=300 #number of processes
+loop=30 #number of processes
 
-size=1 #Integer. As the parameter size increases, the size of the relevant time window on which produced occurrences are counted diminishes.
+size=1. #Integer. As the parameter size increases, the size of the relevant time window on which produced occurrences are counted diminishes.
 M_W=int(M/size)
-W=8 #Number of time windows on which the sliding average is computed.
+W=5 #Number of time windows on which the sliding average is computed.
 
 ##OPTIONS
 
 error_threshold=0.1 #float number between 0. and 1., with 0. for no error tolerance, and 1. to accept all logit modelings. 
 
-close=950. #Float number from 0 to 1000. This parameter governs the closeness to the channel of the minimal value taken as an input for the logit transformation. 0 corresponds to the x_bar value, 100 to the upper fluctuation.
+close=980. #Float number from 0 to 1000. This parameter governs the closeness to the channel of the minimal value taken as an input for the logit transformation. 0 corresponds to the x_bar value, 100 to the upper fluctuation.
 
 plot_logit=0 #=1 to plot the logit transformation of each process.
 
@@ -53,7 +53,7 @@ old_version=0 #1 to run the older version of the program with a zero minimum for
 
 alloc=0 #=1 to consider an alternative mechanism
 
-both_mechs=1 #=1 # to consider both speaker/producer and hearer/interpreter mechanism
+both_mechs=0 #=1 # to consider both speaker/producer and hearer/interpreter mechanism
 
 #INITIALIZING LISTS AND INDICES
 
@@ -235,6 +235,9 @@ while j<loop:
 
     site_call=0
 
+    count=0
+    countdown=0
+
 
     for i in range(time):
       
@@ -293,16 +296,19 @@ while j<loop:
             if i!=0:
                 if i%M_W==0:
                     if observable_P==1:
-                        N_tot.append(float(N_M)/float(site_call))
+                        x_occ=float(N_M)/float(site_call)
+                        N_tot.append(x_occ)
                         N_M=0
                         site_call=0
+                        if (x_occ>(1.-1./float(M))):
+                            count=1
+                        if count==1:
+                            countdown+=1
+                        if countdown>W:
+                                break  
+                        
                     else:
                         N_tot.append(x)
-          
-            if x==1.:
-                if i%(W*M)==0:
-                    break   
-
         
             
     if window==1:
@@ -312,8 +318,10 @@ while j<loop:
         for k in range(len(N_tot)-(W-1)):
             N_W.append((sum(N_tot[k:k+W]))/float(W))
 
+
     else:
         N_W = N_tot
+
 
     Nmax=max(N_W)
 
