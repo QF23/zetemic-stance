@@ -36,13 +36,13 @@ W=8 #Number of time windows on which the sliding average is computed.
 
 ##OPTIONS
 
-error_threshold=1.5 #float number between 0. and 1., with 0. for no error tolerance, and 1. to accept all logit modelings. 
+error_threshold=0.1 #float number between 0. and 1., with 0. for no error tolerance, and 1. to accept all logit modelings. 
 
-close=1000. #Float number from 0 to 1000. This parameter governs the closeness to the channel of the minimal value taken as an input for the logit transformation. 0 corresponds to the x_bar value, 100 to the upper fluctuation.
+close=950. #Float number from 0 to 1000. This parameter governs the closeness to the channel of the minimal value taken as an input for the logit transformation. 0 corresponds to the x_bar value, 100 to the upper fluctuation.
 
 plot_logit=0 #=1 to plot the logit transformation of each process.
 
-para_fixed=0 #=1 to fix the value of the parameters for all loops
+para_fixed=1 #=1 to fix the value of the parameters for all loops
 
 window=1 #=1 to consider time windows as with the other observable
 
@@ -72,6 +72,7 @@ x_bar_data=[]
 t_1_data=[]
 t_2_data=[]
 t_init=[]
+err_data=[]
 
 ##DEFINITIONS DE FONCTIONS##
 
@@ -430,7 +431,7 @@ while j<loop:
                             t_1_data[-1]=t_1_data[-1]-t_init[-1]
                             break
 
-                    logit2=np.array(logit2)
+                    logit2=np.array(logit2[:-2])
 
                     w_MB=logit2.shape[0]
 
@@ -467,7 +468,7 @@ while j<loop:
                         plt.show()
 
 
-                    phiII.append(w_MB)
+                    phiII.append(w_MB+3.)
                     pente.append(h_MB)
                     logphi.append(np.log(w_MB))
                     logP.append(np.log(h_MB))
@@ -565,6 +566,8 @@ while j<loop:
                         beta_data.append(beta)
                         gamma_data.append(gamma)
                         delta_data.append(delta_gamma)
+
+                        err_data.append(err)
 
                         j+=1
 
