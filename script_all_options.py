@@ -54,7 +54,7 @@ old_version=0 #1 to run the older version of the program with a zero minimum for
 
 alloc=0 #=1 to consider an alternative mechanism
 
-both_mechs=1 #=1 # to consider both speaker/producer and hearer/interpreter mechanism
+both_mechs=0 #=1 # to consider both speaker/producer and hearer/interpreter mechanism
 
 #INITIALIZING LISTS AND INDICES
 
@@ -518,7 +518,9 @@ while j<loop:
                                 t_1_data[-1]=t_1_data[-1]-t_init[-1]
                                 break
 
-                        logit2=np.array(logit2[:-2])
+                        #logit2=np.array(logit2[:-2])
+
+                        logit2=np.array(logit2)
 
                         w_MB=logit2.shape[0]
 
@@ -528,7 +530,7 @@ while j<loop:
 
                         h_MB, ord_MB = para_logit2
 
-                        err=np.sqrt(sum((logit2-(h_MB*abs_2+ord_MB))**2)/w_MB)/(sum((logit2-(sum(logit2)/w_MB))**2)/w_MB)
+                        err=sum((logit2-(h_MB*abs_2+ord_MB))**2)/sum((logit2-(sum(logit2)/w_MB))**2)
 
                     if plot_logit==1:
 
