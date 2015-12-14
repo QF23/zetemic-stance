@@ -1,3 +1,4 @@
+
 # -*- coding: utf-8 -*-
 
 
@@ -19,25 +20,25 @@ gamma_init=0.23 #facteur d'implicature
 #np.random.seed(43)
 np.random.seed(23)
 
-beta_min=0.53
-beta_max=2.53 
+beta_min=0.593
+beta_max=2.03 
 #delta_min=0.000002
 delta_min=0.0001
 delta_max=0.0001
 #delta_min=0.002
 #delta_max=0.05
 
-loop=30 #number of processes
+loop=250 #number of processes
 
 size=1. #Integer. As the parameter size increases, the size of the relevant time window on which produced occurrences are counted diminishes.
 M_W=int(M/size)
-W=5 #Number of time windows on which the sliding average is computed.
+W=8 #Number of time windows on which the sliding average is computed.
 
 ##OPTIONS
 
-error_threshold=0.1 #float number between 0. and 1., with 0. for no error tolerance, and 1. to accept all logit modelings. 
+error_threshold=1.5 #float number between 0. and 1., with 0. for no error tolerance, and 1. to accept all logit modelings. 
 
-close=980. #Float number from 0 to 1000. This parameter governs the closeness to the channel of the minimal value taken as an input for the logit transformation. 0 corresponds to the x_bar value, 100 to the upper fluctuation.
+close=1000. #Float number from 0 to 1000. This parameter governs the closeness to the channel of the minimal value taken as an input for the logit transformation. 0 corresponds to the x_bar value, 100 to the upper fluctuation.
 
 plot_logit=0 #=1 to plot the logit transformation of each process.
 
@@ -53,7 +54,7 @@ old_version=0 #1 to run the older version of the program with a zero minimum for
 
 alloc=0 #=1 to consider an alternative mechanism
 
-both_mechs=0 #=1 # to consider both speaker/producer and hearer/interpreter mechanism
+both_mechs=1 #=1 # to consider both speaker/producer and hearer/interpreter mechanism
 
 #INITIALIZING LISTS AND INDICES
 
