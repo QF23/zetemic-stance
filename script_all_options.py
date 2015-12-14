@@ -36,13 +36,13 @@ W=8 #Number of time windows on which the sliding average is computed.
 
 ##OPTIONS
 
-error_threshold=0.1 #float number between 0. and 1., with 0. for no error tolerance, and 1. to accept all logit modelings. 
+error_threshold=1.0 #float number between 0. and 1., with 0. for no error tolerance, and 1. to accept all logit modelings. 
 
-close=950. #Float number from 0 to 1000. This parameter governs the closeness to the channel of the minimal value taken as an input for the logit transformation. 0 corresponds to the x_bar value, 100 to the upper fluctuation.
+close=1000. #Float number from 0 to 1000. This parameter governs the closeness to the channel of the minimal value taken as an input for the logit transformation. 0 corresponds to the x_bar value, 100 to the upper fluctuation.
 
 plot_logit=0 #=1 to plot the logit transformation of each process.
 
-para_fixed=1 #=1 to fix the value of the parameters for all loops
+para_fixed=0 #=1 to fix the value of the parameters for all loops
 
 window=1 #=1 to consider time windows as with the other observable
 
@@ -639,7 +639,7 @@ yP2=linear(logphi,-coeff_phi/coeff_P,-coeff_cross/coeff_P)
 p1, = plt.plot(logphi,yP2,label="Scaling law with exponent %.2f" % (-coeff_phi/coeff_P))
 plt.plot(logphi,logP,'o')
 plt.xlabel('log w ')
-plt.ylabel('log alpha ')
+plt.ylabel('log h')
 plt.title('Scaling law with delta =%f' %delta_min)
 plt.legend(loc=1)
 plt.show()
