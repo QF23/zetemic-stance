@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 
 # -*- coding: utf-8 -*-
 
@@ -30,15 +32,15 @@ delta_max=0.0001
 
 loop=250 #number of processes
 
-size=1. #Integer. As the parameter size increases, the size of the relevant time window on which produced occurrences are counted diminishes.
+size=1. #As the parameter size increases, the size of the relevant time window on which produced occurrences are counted diminishes.
 M_W=int(M/size)
 W=8 #Number of time windows on which the sliding average is computed.
 
 ##OPTIONS
 
-error_threshold=1.0 #float number between 0. and 1., with 0. for no error tolerance, and 1. to accept all logit modelings. 
+error_threshold=0.1 #float number between 0. and 1., with 0. for no error tolerance, and 1. to accept all logit modelings. 
 
-close=1000. #Float number from 0 to 1000. This parameter governs the closeness to the channel of the minimal value taken as an input for the logit transformation. 0 corresponds to the x_bar value, 100 to the upper fluctuation.
+close=950. #Float number from 0 to 1000. This parameter governs the closeness to the channel of the minimal value taken as an input for the logit transformation. 0 corresponds to the x_bar value, 100 to the upper fluctuation.
 
 plot_logit=0 #=1 to plot the logit transformation of each process.
 
