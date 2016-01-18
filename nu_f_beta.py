@@ -1,3 +1,4 @@
+
 # -*- coding: utf-8 -*-
 
 import numpy as np
@@ -15,8 +16,13 @@ gamma_init=0.23 #facteur d'implicature
 #np.random.seed(43)
 np.random.seed(23)
 
-beta_min=0.863
-beta_max=0.863
+beta_min=0.703
+beta_max=1.203
+tip=100
+
+
+
+beta_tip=(beta_max-beta_min)/float(tip)
 
 delta_min=0.0001
 delta_max=0.0001
@@ -49,14 +55,16 @@ phiII=[]
 pente=[]
 logphi=[]
 logP=[]
-beta_data=[]
-gamma_data=[]
-delta_data=[]
-x_bar_data=[]
 t_1_data=[]
 t_2_data=[]
 t_init=[]
-err_data=[]
+
+beta_data=[]
+nu_data=[]
+gamma_data=[]
+delta_data=[]
+x_c_data=[]
+
 
 ##DEFINITIONS DE FONCTIONS##
 
@@ -85,11 +93,10 @@ def linear(x,alp,bet):
 
 ##DEBUT DE LA BOUCLE##
 
-init=0
+beta=beta_min
 
-while j<loop:
+while len(nu_data)<tip:
 
-    beta=np.random.uniform(beta_min,beta_max)
 
     delta_gamma=np.random.uniform(max(0,delta_min),min(1,delta_max)) ##Ecart au gamma critique
 
@@ -195,209 +202,220 @@ while j<loop:
 
     x_out=P_out
     x_entry=P_entry
+    x_c=a
+
+    j=0
+    j_ctrl=0
+
+    phiII=[]
+    pente=[]
+    logphi=[]
+    logP=[]
+    t_1_data=[]
+    t_2_data=[]
+    t_init=[]
+
+    while j<loop:
+
+        memoire=[0]*M
+        N=0
+        x=float(N)/float(M)
+
+        N_tot=[]
+
+        N_M=0
+
+        site_call=0
+
+        count=0
+        countdown=0
 
 
-    memoire=[0]*M
-    N=0
-    x=float(N)/float(M)
+        for i in range(time):
+          
 
-    N_tot=[]
-
-    N_M=0
-
-    site_call=0
-
-    count=0
-    countdown=0
-
-
-    for i in range(time):
-      
-
-        if (alloc==0)&(both_mechs==0):
-            coin_site=1.
-        else:
-            coin_site=np.random.uniform(0,1)
-            coin_add=np.random.uniform(0,1)
-
-        if coin_site>0.5:
-            site_call+=1
-            if (alloc==1)&(both_mechs==0):
-                f=x
+            if (alloc==0)&(both_mechs==0):
+                coin_site=1.
             else:
-                f=(x+gamma)/(1+gamma)
-            if f!=0.0:
-                if f!=1.:
-                    phi=(2*f-1)/np.sqrt(f*(1-f))
-                    P=1./2.*(1+np.tanh(beta*phi))
+                coin_site=np.random.uniform(0,1)
+                coin_add=np.random.uniform(0,1)
+
+            if coin_site>0.5:
+                site_call+=1
+                if (alloc==1)&(both_mechs==0):
+                    f=x
                 else:
-                    P=1.0
-            else:
-                P=0.0
-            dice=np.random.uniform(0,1)
-            if P>dice:
-                N+=1
-                memoire.append(1)
-                N_M+=1
-            else:
-                memoire.append(0)
-            erased=np.random.randint(0,M)
-            occ=memoire[erased]
-            if occ==1:
-                N-=1
-            memoire.remove(occ)
-            x=float(N)/float(M)
-        else :
-            if coin_add<gamma:
-                N+=1
-                memoire.append(1)
+                    f=(x+gamma)/(1+gamma)
+                if f!=0.0:
+                    if f!=1.:
+                        phi=(2*f-1)/np.sqrt(f*(1-f))
+                        P=1./2.*(1+np.tanh(beta*phi))
+                    else:
+                        P=1.0
+                else:
+                    P=0.0
+                dice=np.random.uniform(0,1)
+                if P>dice:
+                    N+=1
+                    memoire.append(1)
+                    N_M+=1
+                else:
+                    memoire.append(0)
                 erased=np.random.randint(0,M)
                 occ=memoire[erased]
                 if occ==1:
                     N-=1
                 memoire.remove(occ)
                 x=float(N)/float(M)
+            else :
+                if coin_add<gamma:
+                    N+=1
+                    memoire.append(1)
+                    erased=np.random.randint(0,M)
+                    occ=memoire[erased]
+                    if occ==1:
+                        N-=1
+                    memoire.remove(occ)
+                    x=float(N)/float(M)
 
 
 
-        if i!=0:
-            if i%M_W==0:
-                x_occ=float(N_M)/float(site_call)
-                N_tot.append(x_occ)
-                N_M=0
-                site_call=0
-                if (x_occ>(1.-1./float(M))):
-                    count=1
-                if count==1:
-                    countdown+=1
-                if countdown>W:
-                        break  
+            if i!=0:
+                if i%M_W==0:
+                    x_occ=float(N_M)/float(site_call)
+                    N_tot.append(x_occ)
+                    N_M=0
+                    site_call=0
+                    if (x_occ>(1.-1./float(M))):
+                        count=1
+                    if count==1:
+                        countdown+=1
+                    if countdown>W:
+                            break  
 
 
 
 
-    N_W=[]
-    
-    for k in range(len(N_tot)-(W-1)):
-        N_W.append((sum(N_tot[k:k+W]))/float(W))
-
-    Nmax=max(N_W)
-
-    if Nmax>(1.-10./float(M)):
-
-            if (db<10**(-6))&(dder<10**(-6)):
-
-                close_loc=1001.
-
-                err=2.
-
-                while (close_loc>close)&(err>error_threshold):
-
-                    close_loc-=1.
-
-                    logit2=[]
-                    bit=1
-                    inibit=1
-                    lower_x=x_out
-                    lower_x2=(1.*(1000.-close_loc)+close_loc*lower_x)/1000.
-                    for i in range(len(N_W)):
-                        if inibit==1:
-                            if N_W[i]>x_entry:
-                                t_init.append(i)
-                                inibit=0
-                        if N_W[i]<(1.-10./float(M)):
-                            if N_W[i]>lower_x2:
-                                logit2.append(1./2.*np.log((N_W[i]-lower_x2)/(1.-N_W[i])))
-                                if bit==1:
-                                    t_1_data.append(i)
-                                    bit=0
-                            if N_W[i]<lower_x2:
-                                if not(not(logit2)):
-                                    t_1_data.pop(-1)
-                                    bit=1
-                                logit2=[]
-                        else:
-                            t_2_data.append(i-t_1_data[-1])
-                            t_1_data[-1]=t_1_data[-1]-t_init[-1]
-                            break
-
-                    #logit2=np.array(logit2[:-2])
-
-                    logit2=np.array(logit2)
-
-                    w_MB=logit2.shape[0]
-
-                    abs_2=np.arange(w_MB)
-
-                    para_logit2,cov_logit2=opt.curve_fit(linear,abs_2,logit2,[1.,0.])
-
-                    h_MB, ord_MB = para_logit2
-
-                    err=sum((logit2-(h_MB*abs_2+ord_MB))**2)/sum((logit2-(sum(logit2)/w_MB))**2)
-
-                if plot_logit==1:
-
-                    length=len(N_W)
-                    low1=[]
-                    low2=[]
-
-                    for i in range(length):
-                        low1.append(lower_x)
-                        low2.append(lower_x2)
-
-                    xdumb=np.arange(length)
-                    
-                    plt.plot(N_W)
-                    plt.plot(xdumb,low1)
-                    plt.plot(xdumb,low2)
-                    plt.show()
-
-                    yP3=linear(abs_2,h_MB,ord_MB)
-
-                    plt.plot(abs_2, logit2, 'go', lw=2)
-                    plt.plot(abs_2,yP3,'r',lw=2)
-                    plt.show()
-
-                if err<error_threshold:
-
-                    phiII.append(w_MB)
-                    pente.append(h_MB)
-                    logphi.append(np.log(w_MB))
-                    logP.append(np.log(h_MB))
-
-                    beta_data.append(beta)
-                    gamma_data.append(gamma)
-                    delta_data.append(delta_gamma)
-
-                    err_data.append(err)
-
-                    j+=1
-
-                else :
-                    print err
+        N_W=[]
         
+        for k in range(len(N_tot)-(W-1)):
+            N_W.append((sum(N_tot[k:k+W]))/float(W))
 
-    if j%10==0:
-        print j
+        Nmax=max(N_W)
 
-    j_ctrl+=1
+        if Nmax>(1.-10./float(M)):
+
+                if (db<10**(-6))&(dder<10**(-6)):
+
+                    close_loc=1001.
+
+                    err=2.
+
+                    while (close_loc>close)&(err>error_threshold):
+
+                        close_loc-=1.
+
+                        logit2=[]
+                        bit=1
+                        inibit=1
+                        lower_x=x_out
+                        lower_x2=(1.*(1000.-close_loc)+close_loc*lower_x)/1000.
+                        for i in range(len(N_W)):
+                            if inibit==1:
+                                if N_W[i]>x_entry:
+                                    t_init.append(i)
+                                    inibit=0
+                            if N_W[i]<(1.-10./float(M)):
+                                if N_W[i]>lower_x2:
+                                    logit2.append(1./2.*np.log((N_W[i]-lower_x2)/(1.-N_W[i])))
+                                    if bit==1:
+                                        t_1_data.append(i)
+                                        bit=0
+                                if N_W[i]<lower_x2:
+                                    if not(not(logit2)):
+                                        t_1_data.pop(-1)
+                                        bit=1
+                                    logit2=[]
+                            else:
+                                t_2_data.append(i-t_1_data[-1])
+                                t_1_data[-1]=t_1_data[-1]-t_init[-1]
+                                break
+
+                        #logit2=np.array(logit2[:-2])
+
+                        logit2=np.array(logit2)
+
+                        w_MB=logit2.shape[0]
+
+                        abs_2=np.arange(w_MB)
+
+                        para_logit2,cov_logit2=opt.curve_fit(linear,abs_2,logit2,[1.,0.])
+
+                        h_MB, ord_MB = para_logit2
+
+                        err=sum((logit2-(h_MB*abs_2+ord_MB))**2)/sum((logit2-(sum(logit2)/w_MB))**2)
+
+                    if plot_logit==1:
+
+                        length=len(N_W)
+                        low1=[]
+                        low2=[]
+
+                        for i in range(length):
+                            low1.append(lower_x)
+                            low2.append(lower_x2)
+
+                        xdumb=np.arange(length)
+                        
+                        plt.plot(N_W)
+                        plt.plot(xdumb,low1)
+                        plt.plot(xdumb,low2)
+                        plt.show()
+
+                        yP3=linear(abs_2,h_MB,ord_MB)
+
+                        plt.plot(abs_2, logit2, 'go', lw=2)
+                        plt.plot(abs_2,yP3,'r',lw=2)
+                        plt.show()
+
+                    if err<error_threshold:
+
+                        phiII.append(w_MB)
+                        pente.append(h_MB)
+                        logphi.append(np.log(w_MB))
+                        logP.append(np.log(h_MB))
 
 
-##Fit symétrique
+                        j+=1
 
-mcov=np.cov(logP,logphi)
-trA=np.trace(mcov)
-detA=np.linalg.det(mcov)
-lambdaA=trA/2.*(1-np.sqrt(1-4.*detA/(trA**2)))
-ob=mcov[0,1]
-oa=mcov[0,0]
-oc=mcov[1,1]
+        j_ctrl+=1
 
-coeff_P=np.sqrt(ob**2/(ob**2+(lambdaA-oa)**2))
-coeff_phi=(lambdaA-oa)/ob*coeff_P
-coeff_cross=-coeff_P*np.mean(logP)-coeff_phi*np.mean(logphi)
 
-nu=-coeff_phi/coeff_P
+    ##Fit symétrique
+
+    mcov=np.cov(logP,logphi)
+    trA=np.trace(mcov)
+    detA=np.linalg.det(mcov)
+    lambdaA=trA/2.*(1-np.sqrt(1-4.*detA/(trA**2)))
+    ob=mcov[0,1]
+    oa=mcov[0,0]
+    oc=mcov[1,1]
+
+    coeff_P=np.sqrt(ob**2/(ob**2+(lambdaA-oa)**2))
+    coeff_phi=(lambdaA-oa)/ob*coeff_P
+    coeff_cross=-coeff_P*np.mean(logP)-coeff_phi*np.mean(logphi)
+
+    nu=-coeff_phi/coeff_P
+
+    print "beta = %s" %beta
+    print nu
+
+    nu_data.append(nu)
+    beta_data.append(beta)
+    x_c_data.append(x_c)
+
+    beta+=beta_tip
+    
 
 
 
