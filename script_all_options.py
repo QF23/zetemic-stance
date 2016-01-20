@@ -1,11 +1,5 @@
-# -*- coding: utf-8 -*-
-
 
 # -*- coding: utf-8 -*-
-
-
-# -*- coding: utf-8 -*-
-
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -22,23 +16,23 @@ gamma_init=0.23 #facteur d'implicature
 #np.random.seed(43)
 np.random.seed(23)
 
-beta_min=0.593
-beta_max=2.03 
+beta_min=0.863
+beta_max=0.863
 #delta_min=0.000002
-delta_min=0.0001
-delta_max=0.0001
+delta_min=0.01
+delta_max=0.01
 #delta_min=0.002
 #delta_max=0.05
 
 loop=250 #number of processes
 
-size=1. #As the parameter size increases, the size of the relevant time window on which produced occurrences are counted diminishes.
+size=0.7 #As the parameter size increases, the size of the relevant time window on which produced occurrences are counted diminishes.
 M_W=int(M/size)
-W=8 #Number of time windows on which the sliding average is computed.
+W=5 #Number of time windows on which the sliding average is computed.
 
 ##OPTIONS
 
-error_threshold=0.1 #float number between 0. and 1., with 0. for no error tolerance, and 1. to accept all logit modelings. 
+error_threshold=0.02 #float number between 0. and 1., with 0. for no error tolerance, and 1. to accept all logit modelings. 
 
 close=950. #Float number from 0 to 1000. This parameter governs the closeness to the channel of the minimal value taken as an input for the logit transformation. 0 corresponds to the x_bar value, 100 to the upper fluctuation.
 
@@ -109,8 +103,11 @@ while j<loop:
 
     beta=np.random.uniform(beta_min,beta_max)
 
-    delta_gamma=np.random.uniform(max(0,delta_min),min(1,delta_max)) ##Ecart au gamma critique
+    pow_delta=np.random.uniform(1,6)
 
+    #delta_gamma=np.random.uniform(max(0,delta_min),min(1,delta_max)) ##Ecart au gamma critique
+
+    delta_gamma=10**(-pow_delta)
 
     ##DETERMINATION DU GAMMA CRITIQUE
 
@@ -521,9 +518,9 @@ while j<loop:
                                 t_1_data[-1]=t_1_data[-1]-t_init[-1]
                                 break
 
-                        #logit2=np.array(logit2[:-2])
+                        logit2=np.array(logit2[:-1])
 
-                        logit2=np.array(logit2)
+                        #logit2=np.array(logit2)
 
                         w_MB=logit2.shape[0]
 
@@ -533,7 +530,7 @@ while j<loop:
 
                         h_MB, ord_MB = para_logit2
 
-                        err=sum((logit2-(h_MB*abs_2+ord_MB))**2)/sum((logit2-(sum(logit2)/w_MB))**2)
+                        err=sum((logit2-(h_MB*abs_2+ord_MB))**2)/sum((logit2-np.mean(logit2))**2)
 
                     if plot_logit==1:
 
@@ -572,6 +569,7 @@ while j<loop:
                         err_data.append(err)
 
                         j+=1
+
 
                     else :
                         print err
@@ -638,7 +636,7 @@ print -coeff_phi/coeff_P,-coeff_cross/coeff_P
 logphi=np.array(logphi)
 
 yP2=linear(logphi,-coeff_phi/coeff_P,-coeff_cross/coeff_P)
-p1, = plt.plot(logphi,yP2,label="Scaling law with exponent %.2f" % (-coeff_phi/coeff_P))
+p1, = plt.plot(logphi,yP2,label="Scaling law with exponent %.3f" % (-coeff_phi/coeff_P))
 plt.plot(logphi,logP,'o')
 plt.xlabel('log w ')
 plt.ylabel('log h')
