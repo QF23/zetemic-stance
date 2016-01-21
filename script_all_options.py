@@ -36,7 +36,7 @@ error_threshold=0.1 #float number between 0. and 1., with 0. for no error tolera
 
 close=950. #Float number from 0 to 1000. This parameter governs the closeness to the channel of the minimal value taken as an input for the logit transformation. 0 corresponds to the x_bar value, 100 to the upper fluctuation.
 
-plot_logit=1 #=1 to plot the logit transformation of each process.
+plot_logit=0 #=1 to plot the logit transformation of each process.
 
 para_fixed=0 #=1 to fix the value of the parameters for all loops
 
@@ -537,6 +537,8 @@ while j<loop:
 
                         h_MB, ord_MB = para_logit2
 
+                        length=len(N_W)
+
                         err=sum((logit2-(h_MB*abs_2+ord_MB))**2)/sum((logit2-np.mean(logit2))**2)
 
                         #MODIFICATION : Définition analytique de h
@@ -545,11 +547,16 @@ while j<loop:
 
                         h_bric=max(der_N)*delta_x/(val_ref-lower_x)/(upper_x-val_ref)
 
+                        scale_factor=float(w_MB)/float(length)
+
+                        h_bric_scaled=h_bric*scale_factor
+
                         ord_bric=-h_bric*x_der-np.log((upper_x-val_ref)/(val_ref-lower_x))
+
+                        ord_bric_scaled=ord_bric*scale_factor
 
                     if plot_logit==1:
 
-                        length=len(N_W)
                         low1=[]
                         low2=[]
                         fake_data=[]
@@ -570,14 +577,24 @@ while j<loop:
                         plt.show()
 
                         yP3=linear(abs_2,h_MB,ord_MB)
-                        yP4=linear(abs_2,h_bric,ord_MB)
 
                         plt.plot(abs_2, logit2, 'go', lw=2)
                         plt.plot(abs_2,yP3,'r',lw=2)
-                        plt.plot(abs_2,yP4,'m',lw=2)
                         plt.show()
 
+                        fake_phiII=[lower_x+delta_x/(1+np.exp(-h_bric*i-ord_bric)) for i in range(t_0,length)]
+                        fake_phiII_logit=[lower_x+delta_x/(1+np.exp(-h_MB*i-ord_MB)) for i in range(w_MB)]
+
+
+                        plt.plot(N_W[t_0:],'+')
+                        plt.plot(fake_phiII,'o')
+                        plt.plot(fake_phiII_logit,'*')
+                        plt.show()
+                        
+
                     if err<error_threshold:
+
+                        h_MB=h_bric
 
                         phiII.append(w_MB)
                         pente.append(h_MB)
@@ -595,9 +612,7 @@ while j<loop:
 
                     else :
                         print err
-                        print h_MB
-                        print h_analytic
-                        print h_note
+
         
 
     if j%10==0:
