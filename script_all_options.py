@@ -36,7 +36,7 @@ error_threshold=0.1 #float number between 0. and 1., with 0. for no error tolera
 
 close=950. #Float number from 0 to 1000. This parameter governs the closeness to the channel of the minimal value taken as an input for the logit transformation. 0 corresponds to the x_bar value, 100 to the upper fluctuation.
 
-plot_logit=0 #=1 to plot the logit transformation of each process.
+plot_logit=1 #=1 to plot the logit transformation of each process.
 
 para_fixed=0 #=1 to fix the value of the parameters for all loops
 
@@ -325,6 +325,10 @@ while j<loop:
     else:
         N_W = N_tot
 
+    der_N=[N_W[i]-N_W[i-1] for i in range(1,len(N_W))]
+    x_der=der_N.index(max(der_N))+1
+    val_ref=N_W[x_der]
+
 
     Nmax=max(N_W)
 
@@ -497,68 +501,80 @@ while j<loop:
                         logit2=[]
                         bit=1
                         inibit=1
-                        lower_x=x_out
-                        lower_x2=(1.*(1000.-close_loc)+close_loc*lower_x)/1000.
+                        upper_x=1.-10./float(M)
+                        lower_x=(1.*(1000.-close_loc)+close_loc*x_out)/1000.
                         for i in range(len(N_W)):
                             if inibit==1:
                                 if N_W[i]>x_entry:
                                     t_init.append(i)
                                     inibit=0
-                            if N_W[i]<(1.-10./float(M)):
-                                if N_W[i]>lower_x2:
-                                    logit2.append(1./2.*np.log((N_W[i]-lower_x2)/(1.-N_W[i])))
+                            if N_W[i]<upper_x:
+                                if N_W[i]>lower_x:
+                                    logit2.append(1./2.*np.log((N_W[i]-lower_x)/(1.-N_W[i])))
                                     if bit==1:
                                         t_1_data.append(i)
                                         bit=0
-                                if N_W[i]<lower_x2:
+                                if N_W[i]<lower_x:
                                     if not(not(logit2)):
                                         t_1_data.pop(-1)
                                         bit=1
                                     logit2=[]
                             else:
                                 t_2_data.append(i-t_1_data[-1])
+                                t_0=t_1_data[-1]
                                 t_1_data[-1]=t_1_data[-1]-t_init[-1]
                                 break
 
-                        logit2=np.array(logit2[:-1])
+                        #logit2=np.array(logit2[:-1])
 
-                        #logit2=np.array(logit2)
+                        logit2=np.array(logit2)
 
                         w_MB=logit2.shape[0]
 
                         abs_2=np.arange(w_MB)
 
-                        para_logit2,cov_logit2=opt.curve_fit(linear,abs_2,logit2,[1.,0.])
+                        para_logit2,cov_logit2=opt.curve_fit(linear,abs_2,logit2,[-1.,0.])
 
                         h_MB, ord_MB = para_logit2
 
+                        err=sum((logit2-(h_MB*abs_2+ord_MB))**2)/sum((logit2-np.mean(logit2))**2)
+
                         #MODIFICATION : Définition analytique de h
 
-                        h_MB=h_analytic
+                        delta_x=upper_x-lower_x
 
-                        err=sum((logit2-(h_MB*abs_2+ord_MB))**2)/sum((logit2-np.mean(logit2))**2)
+                        h_bric=max(der_N)*delta_x/(val_ref-lower_x)/(upper_x-val_ref)
+
+                        ord_bric=-h_bric*x_der-np.log((upper_x-val_ref)/(val_ref-lower_x))
 
                     if plot_logit==1:
 
                         length=len(N_W)
                         low1=[]
                         low2=[]
+                        fake_data=[]
+                        fake_data_2=[]
 
                         for i in range(length):
-                            low1.append(lower_x)
-                            low2.append(lower_x2)
+                            low1.append(x_out)
+                            low2.append(lower_x)
+                            fake_data.append(lower_x+delta_x/(1+np.exp(-h_bric*i-ord_bric)))
 
                         xdumb=np.arange(length)
                         
                         plt.plot(N_W)
+                        plt.plot(fake_data,'o')
+                        plt.plot(fake_data_2,'+')
                         plt.plot(xdumb,low1)
                         plt.plot(xdumb,low2)
                         plt.show()
 
                         yP3=linear(abs_2,h_MB,ord_MB)
+                        yP4=linear(abs_2,h_bric,ord_MB)
 
                         plt.plot(abs_2, logit2, 'go', lw=2)
                         plt.plot(abs_2,yP3,'r',lw=2)
+                        plt.plot(abs_2,yP4,'m',lw=2)
                         plt.show()
 
                     if err<error_threshold:
@@ -579,6 +595,9 @@ while j<loop:
 
                     else :
                         print err
+                        print h_MB
+                        print h_analytic
+                        print h_note
         
 
     if j%10==0:
