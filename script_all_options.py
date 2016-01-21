@@ -19,20 +19,20 @@ np.random.seed(23)
 beta_min=0.863
 beta_max=0.863
 #delta_min=0.000002
-delta_min=0.01
-delta_max=0.01
+delta_min=0.0001
+delta_max=0.0001
 #delta_min=0.002
 #delta_max=0.05
 
 loop=250 #number of processes
 
-size=0.7 #As the parameter size increases, the size of the relevant time window on which produced occurrences are counted diminishes.
+size=1.0 #As the parameter size increases, the size of the relevant time window on which produced occurrences are counted diminishes.
 M_W=int(M/size)
-W=5 #Number of time windows on which the sliding average is computed.
+W=8 #Number of time windows on which the sliding average is computed.
 
 ##OPTIONS
 
-error_threshold=0.02 #float number between 0. and 1., with 0. for no error tolerance, and 1. to accept all logit modelings. 
+error_threshold=0.1 #float number between 0. and 1., with 0. for no error tolerance, and 1. to accept all logit modelings. 
 
 close=950. #Float number from 0 to 1000. This parameter governs the closeness to the channel of the minimal value taken as an input for the logit transformation. 0 corresponds to the x_bar value, 100 to the upper fluctuation.
 
@@ -103,11 +103,11 @@ while j<loop:
 
     beta=np.random.uniform(beta_min,beta_max)
 
-    pow_delta=np.random.uniform(1,6)
+    #pow_delta=np.random.uniform(delta_max,delta_min)
 
-    #delta_gamma=np.random.uniform(max(0,delta_min),min(1,delta_max)) ##Ecart au gamma critique
+    delta_gamma=np.random.uniform(max(0,delta_min),min(1,delta_max)) ##Ecart au gamma critique
 
-    delta_gamma=10**(-pow_delta)
+    #delta_gamma=10**(-pow_delta)
 
     ##DETERMINATION DU GAMMA CRITIQUE
 
@@ -209,6 +209,8 @@ while j<loop:
         else:
             F.append(1./2.*(1./2.*(1+np.tanh(beta*phi))-x+gamma*(1-x)))
         P.append(1./2.*(1+np.tanh(beta*phi)))
+
+    h_analytic=max(F)
 
         
     F=F[0:500]
@@ -529,6 +531,10 @@ while j<loop:
                         para_logit2,cov_logit2=opt.curve_fit(linear,abs_2,logit2,[1.,0.])
 
                         h_MB, ord_MB = para_logit2
+
+                        #MODIFICATION : Définition analytique de h
+
+                        h_MB=h_analytic
 
                         err=sum((logit2-(h_MB*abs_2+ord_MB))**2)/sum((logit2-np.mean(logit2))**2)
 
