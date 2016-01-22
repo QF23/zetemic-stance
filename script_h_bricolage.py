@@ -554,7 +554,9 @@ while j<loop:
 
                         h_MB, ord_MB = h_0, o_0
 
-                        err=sum((logit2-(h_MB*(abs_2+t_0)+ord_MB))**2)/sum((logit2-np.mean(logit2))**2)
+                        err=sum((logit2-(h_MB*abs_2+ord_MB))**2)/sum((logit2-np.mean(logit2))**2)
+
+                        #err=sum((logit2-(h_MB*(abs_2+t_0)+ord_MB))**2)/sum((logit2-np.mean(logit2))**2)
 
                         #err=sum((lower_x+delta_x/(1+np.exp(-h_bric*i-ord_bric))-N_W[i])**2 for i in range(t_0,length))
 
