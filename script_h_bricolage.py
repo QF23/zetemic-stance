@@ -36,7 +36,7 @@ error_threshold=0.01 #float number between 0. and 1., with 0. for no error toler
 
 close=950. #Float number from 0 to 1000. This parameter governs the closeness to the channel of the minimal value taken as an input for the logit transformation. 0 corresponds to the x_bar value, 100 to the upper fluctuation.
 
-plot_logit=1 #=1 to plot the logit transformation of each process.
+plot_logit=0 #=1 to plot the logit transformation of each process.
 
 para_fixed=0 #=1 to fix the value of the parameters for all loops
 
@@ -511,7 +511,7 @@ while j<loop:
                                     inibit=0
                             if N_W[i]<upper_x:
                                 if N_W[i]>lower_x:
-                                    logit2.append(1./2.*np.log((N_W[i]-lower_x)/(1.-N_W[i])))
+                                    logit2.append(np.log((N_W[i]-lower_x)/(1.-N_W[i])))
                                     if bit==1:
                                         t_1_data.append(i)
                                         bit=0
@@ -534,8 +534,6 @@ while j<loop:
 
                         length=len(N_W)
 
-                        upper_x=1.
-
                         delta_x=upper_x-lower_x
 
                         scaling_factor=float(w_MB)/float(length)
@@ -554,9 +552,11 @@ while j<loop:
 
                         h_0, o_0 = para_logit2
 
-                        #err=sum((logit2-(h_MB*(abs_2+t_0)+ord_MB))**2)/sum((logit2-np.mean(logit2))**2)
+                        h_MB, ord_MB = h_0, o_0
 
-                        err=sum((lower_x+delta_x/(1+np.exp(-h_bric*i-ord_bric))-N_W[i])**2 for i in range(t_0,length))
+                        err=sum((logit2-(h_MB*(abs_2+t_0)+ord_MB))**2)/sum((logit2-np.mean(logit2))**2)
+
+                        #err=sum((lower_x+delta_x/(1+np.exp(-h_bric*i-ord_bric))-N_W[i])**2 for i in range(t_0,length))
 
                     if plot_logit==1:
 
@@ -564,11 +564,13 @@ while j<loop:
                         low2=[lower_x for i in range(length)]
 
                         fake_data=[lower_x+delta_x/(1+np.exp(-h_bric*i-ord_bric)) for i in range(length)]
+                        fake_data_logit=[lower_x+delta_x/(1+np.exp(-h_0*(i-t_0)-o_0)) for i in range(length)]
 
                         xdumb=np.arange(length)
                         
                         plt.plot(N_W)
                         plt.plot(fake_data,'o')
+                        plt.plot(fake_data_logit,'*')
                         plt.plot(xdumb,low1)
                         plt.plot(xdumb,low2)
                         plt.show()
@@ -590,18 +592,7 @@ while j<loop:
                         plt.plot(abs_2, logit2, 'go', lw=2)
                         plt.show()                 
 
-                        logit_fake_2=[np.log((fake_phiII[i]-lower_x)/(upper_x-fake_phiII[i])) for i in range(len(fake_phiII))]
-                        abs_4=np.arange(len(logit_fake_2))
-                        log_h, log_b = opt.curve_fit(linear,abs_4,logit_fake_2,[1.,0.])
-                        plt.plot(abs_4,logit_fake_2,'o')
-                        plt.show()
-                        print log_h
-                        print h_0
-                        print h_MB
-
                     if err<error_threshold:
-
-                        h_MB=h_0
 
                         phiII.append(w_MB)
                         pente.append(h_MB)
