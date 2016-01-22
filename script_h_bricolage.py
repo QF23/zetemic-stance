@@ -32,7 +32,7 @@ W=8 #Number of time windows on which the sliding average is computed.
 
 ##OPTIONS
 
-error_threshold=1.0 #float number between 0. and 1., with 0. for no error tolerance, and 1. to accept all logit modelings. 
+error_threshold=0.01 #float number between 0. and 1., with 0. for no error tolerance, and 1. to accept all logit modelings. 
 
 close=950. #Float number from 0 to 1000. This parameter governs the closeness to the channel of the minimal value taken as an input for the logit transformation. 0 corresponds to the x_bar value, 100 to the upper fluctuation.
 
@@ -534,6 +534,8 @@ while j<loop:
 
                         length=len(N_W)
 
+                        upper_x=1.
+
                         delta_x=upper_x-lower_x
 
                         scaling_factor=float(w_MB)/float(length)
@@ -544,13 +546,17 @@ while j<loop:
 
                         h_MB, ord_MB = h_bric, ord_bric
 
+                        logit2=logit2[:-3]
+
+                        abs_2=abs_2[:-3]
+
                         para_logit2,cov_logit2=opt.curve_fit(linear,abs_2,logit2,[1.,0.])
 
                         h_0, o_0 = para_logit2
 
                         #err=sum((logit2-(h_MB*(abs_2+t_0)+ord_MB))**2)/sum((logit2-np.mean(logit2))**2)
 
-                        err=sum((logit2-(h_0*(abs_2)+o_0))**2)/sum((logit2-np.mean(logit2))**2)
+                        err=sum((lower_x+delta_x/(1+np.exp(-h_bric*i-ord_bric))-N_W[i])**2 for i in range(t_0,length))
 
                     if plot_logit==1:
 
@@ -575,9 +581,6 @@ while j<loop:
                         plt.plot(fake_phiII,'o')
                         plt.show()
 
-                        print h_MB
-                        print h_0
-
 
                         yP3=linear(abs_2,h_0,o_0)
 
@@ -586,11 +589,19 @@ while j<loop:
                         plt.plot(abs_2,yP3,'r',lw=2)
                         plt.plot(abs_2, logit2, 'go', lw=2)
                         plt.show()                 
-                        
+
+                        logit_fake_2=[np.log((fake_phiII[i]-lower_x)/(upper_x-fake_phiII[i])) for i in range(len(fake_phiII))]
+                        abs_4=np.arange(len(logit_fake_2))
+                        log_h, log_b = opt.curve_fit(linear,abs_4,logit_fake_2,[1.,0.])
+                        plt.plot(abs_4,logit_fake_2,'o')
+                        plt.show()
+                        print log_h
+                        print h_0
+                        print h_MB
 
                     if err<error_threshold:
 
-                        h_MB=h_bric
+                        h_MB=h_0
 
                         phiII.append(w_MB)
                         pente.append(h_MB)
