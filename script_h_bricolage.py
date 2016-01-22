@@ -36,7 +36,7 @@ error_threshold=1.0 #float number between 0. and 1., with 0. for no error tolera
 
 close=950. #Float number from 0 to 1000. This parameter governs the closeness to the channel of the minimal value taken as an input for the logit transformation. 0 corresponds to the x_bar value, 100 to the upper fluctuation.
 
-plot_logit=0 #=1 to plot the logit transformation of each process.
+plot_logit=1 #=1 to plot the logit transformation of each process.
 
 para_fixed=0 #=1 to fix the value of the parameters for all loops
 
@@ -544,25 +544,25 @@ while j<loop:
 
                         h_MB, ord_MB = h_bric, ord_bric
 
-                        err=sum((logit2-(h_MB*(abs_2+t_0)+ord_MB))**2)/sum((logit2-np.mean(logit2))**2)                        
+                        para_logit2,cov_logit2=opt.curve_fit(linear,abs_2,logit2,[1.,0.])
+
+                        h_0, o_0 = para_logit2
+
+                        #err=sum((logit2-(h_MB*(abs_2+t_0)+ord_MB))**2)/sum((logit2-np.mean(logit2))**2)
+
+                        err=sum((logit2-(h_0*(abs_2)+o_0))**2)/sum((logit2-np.mean(logit2))**2)
 
                     if plot_logit==1:
 
-                        low1=[]
-                        low2=[]
-                        fake_data=[]
-                        fake_data_2=[]
+                        low1=[x_out for i in range(length)]
+                        low2=[lower_x for i in range(length)]
 
-                        for i in range(length):
-                            low1.append(x_out)
-                            low2.append(lower_x)
-                            fake_data.append(lower_x+delta_x/(1+np.exp(-h_bric*i-ord_bric)))
+                        fake_data=[lower_x+delta_x/(1+np.exp(-h_bric*i-ord_bric)) for i in range(length)]
 
                         xdumb=np.arange(length)
                         
                         plt.plot(N_W)
                         plt.plot(fake_data,'o')
-                        plt.plot(fake_data_2,'+')
                         plt.plot(xdumb,low1)
                         plt.plot(xdumb,low2)
                         plt.show()
@@ -575,12 +575,15 @@ while j<loop:
                         plt.plot(fake_phiII,'o')
                         plt.show()
 
-                        #h_bric, ord_bric = scaling_factor*h_bric, scaling_factor*ord_bric
+                        print h_MB
+                        print h_0
 
-                        fake_data=[lower_x+delta_x/(1+np.exp(-h_bric*i-ord_bric)) for i in range(length)]
+
+                        yP3=linear(abs_2,h_0,o_0)
 
                         logit_fake=[np.log((fake_data[i]-lower_x)/(upper_x-fake_data[i])) for i in range(length)]
                         plt.plot(abs_2,logit_fake[t_0:t_0+len(abs_2)],'mo')
+                        plt.plot(abs_2,yP3,'r',lw=2)
                         plt.plot(abs_2, logit2, 'go', lw=2)
                         plt.show()                 
                         
