@@ -24,7 +24,7 @@ delta_max=0.0001
 #delta_min=0.002
 #delta_max=0.05
 
-loop=250 #number of processes
+loop=500 #number of processes
 
 size=1.0 #As the parameter size increases, the size of the relevant time window on which produced occurrences are counted diminishes.
 M_W=int(M/size)
@@ -36,7 +36,7 @@ error_threshold=0.01 #float number between 0. and 1., with 0. for no error toler
 
 close=950. #Float number from 0 to 1000. This parameter governs the closeness to the channel of the minimal value taken as an input for the logit transformation. 0 corresponds to the x_bar value, 100 to the upper fluctuation.
 
-plot_logit=0 #=1 to plot the logit transformation of each process.
+plot_logit=1 #=1 to plot the logit transformation of each process.
 
 para_fixed=0 #=1 to fix the value of the parameters for all loops
 
@@ -65,6 +65,7 @@ beta_data=[]
 gamma_data=[]
 delta_data=[]
 x_bar_data=[]
+h_bric_data=[]
 t_1_data=[]
 t_2_data=[]
 t_init=[]
@@ -313,17 +314,12 @@ while j<loop:
                     else:
                         N_tot.append(x)
         
-            
-    if window==1:
 
-        N_W=[]
-        
-        for k in range(len(N_tot)-(W-1)):
-            N_W.append((sum(N_tot[k:k+W]))/float(W))
+    N_W=[]
+    
+    for k in range(len(N_tot)-(W-1)):
+        N_W.append((sum(N_tot[k:k+W]))/float(W))
 
-
-    else:
-        N_W = N_tot
 
     der_N=[N_W[i]-N_W[i-1] for i in range(1,len(N_W))]
     x_der=der_N.index(max(der_N))+1
@@ -332,161 +328,7 @@ while j<loop:
 
     Nmax=max(N_W)
 
-    if x_bar_version==1:
-        
-        logit=[]
-        for i in range(len(N_W)):
-            if N_W[i]<(1.-1./float(M)):
-                if N_W[i]>0.:
-                    logit.append(1./2.*np.log(N_W[i]/(1.-N_W[i])))
-            else:
-                break
-
-        x=np.arange(0,len(logit),1)*1.0
-        logit=np.array(logit)
-
-
-        parametres,covariance=opt.curve_fit(fun,x,logit,[0.00001,0,7.8,len(logit)*2./3.])
-
-        a,b,c,x_bar=parametres[:]
-
-        if old_version==1:    
-
-            phaseII=len(logit)-x_bar
-
-            if plot_logit==1:
-                
-                lower_x=x_out
-                lower_x2=(1.*(1000.-close)+close*lower_x)/1000.
-                lower_x_0=N_W[int(x_bar)-1]
-                y2=fun(x,a,b,c,x_bar)
-                plt.plot(x,y2)
-                plt.plot(x,logit)
-                plt.show()
-
-                length=len(N_W)
-                low1=[]
-                low2=[]
-                low3=[]
-
-                for i in range(length):
-                    low1.append(lower_x)
-                    low2.append(lower_x2)
-                    low3.append(lower_x_0)
-
-                xdumb=np.arange(length)
-                
-                plt.plot(N_W)
-                plt.plot(xdumb,low1)
-                plt.plot(xdumb,low2)
-                plt.plot(xdumb,low3)
-                plt.show()    
-
-            if Nmax>0.9 :
-
-                if (db<10**(-6))&(dder<10**(-6)):
-
-                    if x_bar>1.:
-
-                        if a<c:
-                        
-                            if np.isfinite(np.log(phaseII)):
-
-                                    phiII.append(phaseII)
-                                    pente.append(c)
-                                    logphi.append(np.log(phaseII))
-                                    logP.append(np.log(c))
-                                    beta_data.append(beta)
-                                    gamma_data.append(gamma)
-                                    delta_data.append(delta_gamma)
-                                    x_bar_data.append(x_bar)
-
-                                    j+=1
-
-        else:
-
-            if Nmax>(1.-10./float(M)):
-
-                if (db<10**(-6))&(dder<10**(-6)):
-
-                    logit2=[]
-                    bit=1
-                    inibit=1
-                    lower_x=x_out
-                    lower_x2=(1.*(1000.-close)+close*lower_x)/1000.
-                    lower_x_bar=N_W[int(x_bar)-1]
-                    for i in range(len(N_W)):
-                        if inibit==1:
-                            if N_W[i]>x_entry:
-                                t_init.append(i)
-                                inibit=0
-                        if N_W[i]<(1.-10./float(M)):
-                            if N_W[i]>lower_x_bar:
-                                logit2.append(1./2.*np.log((N_W[i]-lower_x_bar)/(1.-N_W[i])))
-                                if bit==1:
-                                    t_1_data.append(i)
-                                    bit=0
-                            if N_W[i]<lower_x2:
-                                if not(not(logit2)):
-                                    t_1_data.pop(-1)
-                                    bit=1
-                                logit2=[]
-                        else:
-                            t_2_data.append(i-t_1_data[-1])
-                            t_1_data[-1]=t_1_data[-1]-t_init[-1]
-                            break
-
-                    logit2=np.array(logit2[:-2])
-
-                    w_MB=logit2.shape[0]
-
-                    abs_2=np.arange(w_MB)
-
-                    para_logit2,cov_logit2=opt.curve_fit(linear,abs_2,logit2,[1.,0.])
-
-                    h_MB, ord_MB = para_logit2
-
-                    if plot_logit==1:
-
-                        length=len(N_W)
-                        low1=[]
-                        low2=[]
-                        low3=[]
-
-                        for i in range(length):
-                            low1.append(lower_x)
-                            low2.append(lower_x2)
-                            low3.append(lower_x_bar)
-
-                        xdumb=np.arange(length)
-                        
-                        plt.plot(N_W)
-                        plt.plot(xdumb,low1)
-                        plt.plot(xdumb,low2)
-                        plt.plot(xdumb,low3)
-                        plt.show()
-
-                        yP3=linear(abs_2,h_MB,ord_MB)
-
-                        plt.plot(abs_2, logit2, 'go', lw=2)
-                        plt.plot(abs_2,yP3,'r',lw=2)
-                        plt.show()
-
-
-                    phiII.append(w_MB+3.)
-                    pente.append(h_MB)
-                    logphi.append(np.log(w_MB))
-                    logP.append(np.log(h_MB))
-
-                    beta_data.append(beta)
-                    gamma_data.append(gamma)
-                    delta_data.append(delta_gamma)
-
-                    j+=1
-                    
-    else:
-        
-        if Nmax>(1.-10./float(M)):
+    if Nmax>(1.-10./float(M)):
 
                 if (db<10**(-6))&(dder<10**(-6)):
 
@@ -542,8 +384,6 @@ while j<loop:
 
                         ord_bric=-h_bric*x_der-np.log((upper_x-val_ref)/(val_ref-lower_x))
 
-                        h_MB, ord_MB = h_bric, ord_bric
-
                         logit2=logit2[:-3]
 
                         abs_2=abs_2[:-3]
@@ -580,6 +420,7 @@ while j<loop:
     
 
                         fake_phiII=[lower_x+delta_x/(1+np.exp(-h_bric*i-ord_bric)) for i in range(t_0,length)]
+                        logit_phiII=[lower_x+delta_x/(1+np.exp(-h_0*i-o_0)) for i in range(0,length-t_0)]
 
                         plt.plot(N_W[t_0:],'+')
                         plt.plot(fake_phiII,'o')
@@ -600,6 +441,7 @@ while j<loop:
                         pente.append(h_MB)
                         logphi.append(np.log(w_MB))
                         logP.append(np.log(h_MB))
+                        h_bric_data.append(h_bric)
 
                         beta_data.append(beta)
                         gamma_data.append(gamma)
