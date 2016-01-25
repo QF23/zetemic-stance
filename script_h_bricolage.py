@@ -424,6 +424,7 @@ while j<loop:
 
                         plt.plot(N_W[t_0:],'+')
                         plt.plot(fake_phiII,'o')
+                        plt.plot(logit_phiII,'*')
                         plt.show()
 
 
